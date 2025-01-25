@@ -6,9 +6,15 @@ using namespace std;
 
 int main() {
     Position pos1;
-    pos1.play(1);
+
+    while (!pos1.hasWon()) {
+        pos1.printPosition();
+        int pMove;
+        cin >> pMove;
+
+        pos1.play(pMove);
+        pos1.play(calculateNextMove(pos1));
+    }
 
     pos1.printPosition();
-    cout << calculateNextMove(pos1) << endl;
-    cout << pos1.isWinningMove(0) << endl;
 }

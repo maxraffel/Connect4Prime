@@ -21,8 +21,8 @@ class Position {
         void printPosition();
         void printMask();
         void printCurrentPlayerMask();
-        static const int BOARD_WIDTH = 4;
-        static const int BOARD_HEIGHT = 4;
+        static const int BOARD_WIDTH = 5;
+        static const int BOARD_HEIGHT = 5;
         static const int MAX_MOVES = BOARD_HEIGHT*BOARD_WIDTH;
 
         int turnsLeft();

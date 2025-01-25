@@ -72,7 +72,6 @@ void Position::printPosition() { //figure out static
     // can redo with shift but speed of this function is pretty inconsequential
     bitset<64> maskBitset = bitset<64>(mask);
     bitset<64> currentPlayerBitset = bitset<64>(currentPlayerMask);
-    cout << maskBitset << endl;
     for (int h = BOARD_HEIGHT - 1; h >= 0; h--) {
         for (int w = 0; w < BOARD_WIDTH; w++) {
             if (currentPlayerBitset[(BOARD_HEIGHT+1)*w + h]) {
