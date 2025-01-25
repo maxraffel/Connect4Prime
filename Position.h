@@ -23,9 +23,13 @@ class Position {
         void printCurrentPlayerMask();
         static const int BOARD_WIDTH = 4;
         static const int BOARD_HEIGHT = 4;
+        static const int MAX_MOVES = BOARD_HEIGHT*BOARD_WIDTH;
+
+        int turnsLeft();
 
         bool isDraw();
         bool hasWon(uint64_t playerMask);
+        bool hasWon();
         bool isWinningMove(int x);
 
         bool canPlay(int x);

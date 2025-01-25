@@ -14,7 +14,7 @@ int calculateNextMove(Position pos) {
         Position tempPos(pos);
         if (pos.canPlay(i)) {
             tempPos.play(i);
-            int score = scoreMove(tempPos, nodesVisited);
+            int score = -scoreMove(tempPos, nodesVisited);
 
             if (score >= baseline) {
                 baseline = score;
@@ -26,19 +26,18 @@ int calculateNextMove(Position pos) {
     return bestMove;
 }
 
-// score the move that has just been made
+// score the position for the current player
 int scoreMove(Position pos, int &visited) {
     visited++;
     if (pos.isDraw()) return 0;
 
-    // if a win next turn is possible
     for (int i = 0; i < pos.BOARD_WIDTH; i++) {
         if (pos.canPlay(i) && pos.isWinningMove(i)) {
-            return -(pos.BOARD_HEIGHT*pos.BOARD_WIDTH - pos.turns() + 1)/2;
+            return pos.turnsLeft();
         }
     }
 
-    int baseline = -(pos.BOARD_WIDTH*pos.BOARD_HEIGHT - pos.turns());
+    int baseline = -(pos.turnsLeft());
     for (int i = 0; i < pos.BOARD_WIDTH; i++) {
         if (pos.canPlay(i)) {
             Position tempPos(pos);

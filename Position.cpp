@@ -6,6 +6,10 @@
 using namespace std;
 
 
+int Position::turnsLeft() {
+    return MAX_MOVES - turnsPassed;
+}
+
 void Position::play(int x) {
     currentPlayerMask ^= mask; //swap which player is in current player mask (so now mask represents old player)
     mask |= mask + (1ULL << ((BOARD_HEIGHT + 1)*x));
@@ -41,6 +45,10 @@ bool Position::hasWon(uint64_t playerMask) {
     return false;
 }
 
+bool Position::hasWon() {
+    return hasWon(currentPlayerMask^mask);
+}
+
 bool Position::isWinningMove(int x) {
     // simulate making the move on a temporary bitboard
     uint64_t tempPlayerMask = mask^currentPlayerMask;
@@ -64,7 +72,7 @@ void Position::printPosition() { //figure out static
     // can redo with shift but speed of this function is pretty inconsequential
     bitset<64> maskBitset = bitset<64>(mask);
     bitset<64> currentPlayerBitset = bitset<64>(currentPlayerMask);
-    //cout << maskBitset << endl;
+    cout << maskBitset << endl;
     for (int h = BOARD_HEIGHT - 1; h >= 0; h--) {
         for (int w = 0; w < BOARD_WIDTH; w++) {
             if (currentPlayerBitset[(BOARD_HEIGHT+1)*w + h]) {
@@ -73,7 +81,7 @@ void Position::printPosition() { //figure out static
                 } else {
                     cout << "🟡";
                 }
-            } else if (maskBitset[(BOARD_WIDTH+1)*w + h]) { // first player to move is red
+            } else if (maskBitset[(BOARD_HEIGHT+1)*w + h]) { // first player to move is red
                 if (turnsPassed % 2 == 0) {
                     cout << "🟡";
                 } else {
