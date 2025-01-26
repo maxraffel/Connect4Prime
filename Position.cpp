@@ -5,6 +5,12 @@
 
 using namespace std;
 
+Position::Position() {
+    for (int i = 0; i < BOARD_WIDTH; i++) {
+        bottomMask += 1ULL << (i*(BOARD_HEIGHT+1));
+    }
+    boardMask -= (bottomMask << BOARD_HEIGHT);
+}
 
 int Position::turnsLeft() {
     return MAX_MOVES - turnsPassed;
@@ -98,6 +104,12 @@ void Position::printPosition() { //figure out static
 void Position::printBitboard(uint64_t bitboardInt) {
     bitset<64>bitboard = bitset<64>(bitboardInt);
 
+    for (int w = 0; w < BOARD_WIDTH; w++) {
+            cout << bitboard[(BOARD_HEIGHT+1)*w + BOARD_HEIGHT] << " ";
+    }
+
+    cout << endl << "^buffer^" << endl;
+
     for (int h = BOARD_HEIGHT - 1; h >= 0; h--) {
         for (int w = 0; w < BOARD_WIDTH; w++) {
             cout << bitboard[(BOARD_HEIGHT+1)*w + h] << " ";
@@ -105,6 +117,10 @@ void Position::printBitboard(uint64_t bitboardInt) {
         cout << endl;
     }
     cout << endl;
+}
+
+void Position::printBitboard() {
+    printBitboard(mask);
 }
 
 void Position::printMask() {
@@ -118,3 +134,67 @@ void Position::printCurrentPlayerMask() {
 int Position::turns() {
     return turnsPassed;
 }
+
+uint64_t Position::winningSpaces(uint64_t playerMask, uint64_t fullMask) {
+    uint64_t spaces = 0;
+
+    // left shift by 1 is equivalent to shifting up vertically one
+    // left shift by BOARD_HEIGHT+1 is equivalent to shifting right horizontally one
+
+    // only need to check top of vertical - bar of 0s at the top blocks overflow from other columns
+    spaces |= (playerMask << 1) & (playerMask << 2) & (playerMask << 3);
+
+    // horizontal - first collect groups of 2 
+    int64_t doubles = (playerMask << (BOARD_HEIGHT+1)) & (playerMask << (BOARD_HEIGHT+1)*2);
+    // check on right side
+    spaces |= doubles & (playerMask >> (BOARD_HEIGHT+1));
+    spaces |= (doubles & playerMask) << (BOARD_HEIGHT+1);
+    // left side
+    doubles >>= (BOARD_HEIGHT+1)*3;
+    spaces |= doubles & (playerMask << (BOARD_HEIGHT+1));
+    spaces |= (doubles & playerMask) >> (BOARD_HEIGHT+1);
+
+    //up-right diagonal
+    doubles = (playerMask << (BOARD_HEIGHT+2)) & (playerMask << (BOARD_HEIGHT+2)*2);
+    // check on right side
+    spaces |= doubles & (playerMask >> (BOARD_HEIGHT+2));
+    spaces |= (doubles & playerMask) << (BOARD_HEIGHT+2);
+    // left side
+    doubles >>= (BOARD_HEIGHT+2)*3;
+    spaces |= doubles & (playerMask << (BOARD_HEIGHT+2));
+    spaces |= (doubles & playerMask) >> (BOARD_HEIGHT+2);
+
+    //down-left diagonal
+    doubles = (playerMask << (BOARD_HEIGHT)) & (playerMask << (BOARD_HEIGHT)*2);
+    // check on right side
+    spaces |= doubles & (playerMask >> (BOARD_HEIGHT));
+    spaces |= (doubles & playerMask) << (BOARD_HEIGHT);
+    // left side
+    doubles >>= (BOARD_HEIGHT)*3;
+    spaces |= doubles & (playerMask << (BOARD_HEIGHT));
+    spaces |= (doubles & playerMask) >> (BOARD_HEIGHT);
+
+    return spaces & (spaces ^ fullMask);
+}
+
+uint64_t Position::possibleMoveMask() {
+    return (mask + bottomMask) & boardMask;
+}
+
+uint64_t Position::goodMoveMask() {
+    uint64_t possibleMoves = possibleMoveMask();
+    uint64_t opponentWins = winningSpaces(currentPlayerMask^mask, mask);
+    uint64_t forcedMoves = possibleMoves & opponentWins;
+    if (forcedMoves) {
+        if (forcedMoves & (forcedMoves - 1)) {
+        return 0;
+        } else {
+            possibleMoves = forcedMoves;
+        }
+    }
+    return possibleMoves & ~(opponentWins >> 1);
+}
+
+// uint64_t Position::columnMask(int x) {
+//     return ((1ULL << BOARD_HEIGHT)-1) << x*(BOARD_HEIGHT+1);
+// }
