@@ -198,3 +198,15 @@ uint64_t Position::goodMoveMask() {
 // uint64_t Position::columnMask(int x) {
 //     return ((1ULL << BOARD_HEIGHT)-1) << x*(BOARD_HEIGHT+1);
 // }
+
+int Position::popcount(uint64_t x)
+{
+    int count;
+    for (count=0; x; count++)
+        x &= x - 1;
+    return count;
+}
+
+int Position::orderScore(uint64_t moveMask) {
+    return popcount(winningSpaces(currentPlayerMask | moveMask, mask));
+}

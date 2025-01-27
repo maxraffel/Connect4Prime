@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Position.h"
 #include "Solver.h"
+#include "MoveSorter.h"
 
 
 
@@ -16,6 +17,7 @@ int Solver::calculateNextMove(Position pos) {
     for (int i = 0; i < pos.BOARD_WIDTH; i++) {
         Position tempPos(pos);
         if (pos.canPlay(i)) {
+            if (tempPos.isWinningMove(i)) return i;
             tempPos.play(i);
             int score = -scoreMove(tempPos, nodesVisited, -pos.turnsLeft(), pos.turnsLeft());
 
@@ -68,19 +70,38 @@ int Solver::scoreMove(Position& pos, int &visited, int alpha, int beta) {
     //     }
     // }
 
+    // now actually start looking at next moves
+    MoveSorter sorter;
     for (int i = 0; i < pos.BOARD_WIDTH; i++) {
-        if (goodMoves & Position::columnMask(columnOrder[i]) /*pos.canPlay(columnOrder[i])*/) {
-            Position tempPos(pos);
-            tempPos.play(columnOrder[i]);
-            int score = -scoreMove(tempPos, visited, -beta, -alpha);
+        uint64_t moveMask = goodMoves & Position::columnMask(columnOrder[i]);
+        if (moveMask /*pos.canPlay(columnOrder[i])*/) {
+            sorter.add(columnOrder[i], pos.orderScore(moveMask));
 
-            if (score >= beta) {
-                return score;
-            }
-            if (score > alpha) {
-                alpha = score;
-            }
+
+            // Position tempPos(pos);
+            // tempPos.play(columnOrder[i]);
+            // int score = -scoreMove(tempPos, visited, -beta, -alpha);
+
+            // if (score >= beta) {
+            //     return score;
+            // }
+            // if (score > alpha) {
+            //     alpha = score;
+            // }
+        }
+    }
+
+    for (int i = 0; i < sorter.size; i++) {
+        Position tempPos(pos);
+        tempPos.play(sorter.nextMove());
+        int score = -scoreMove(tempPos, visited, -beta, -alpha);
+        if (score >= beta) {
+            return score;
+        }
+        if (score > alpha) {
+            alpha = score;
         }
     }
     return alpha;
 }
+

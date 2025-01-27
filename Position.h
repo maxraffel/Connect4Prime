@@ -24,8 +24,8 @@ class Position {
         void printBitboard();
         void printMask();
         void printCurrentPlayerMask();
-        static const int BOARD_WIDTH = 5;
-        static const int BOARD_HEIGHT = 5;
+        static const int BOARD_WIDTH = 6;
+        static const int BOARD_HEIGHT = 6;
         static const int MAX_MOVES = BOARD_HEIGHT*BOARD_WIDTH;
 
         uint64_t winningSpaces(uint64_t playerMask, uint64_t fullMask);
@@ -47,6 +47,9 @@ class Position {
         static constexpr uint64_t columnMask(int col) {
             return ((UINT64_C(1) << BOARD_HEIGHT)-1) << col*(BOARD_HEIGHT+1);
         }
+
+        int popcount(uint64_t x);
+        int orderScore(uint64_t moveMask);
 
     //private:
         uint64_t mask = 0;
